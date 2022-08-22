@@ -1,0 +1,22 @@
+.nv-link{
+    background-color: rgba(0, 0, 0, 0);
+    color: rgba(255, 255, 255, 0.5);
+    display: block;
+  
+}
+.nv-link:hover{
+    text-decoration: none;
+    background-color: transparent;
+    color:rgba(255,255,255,.75);
+}
+.nv-link:visited{
+    color: #fff;
+}
+
+.nv-link:active{
+    color: rgba(255,255,255,.75);
+}
+
+*, ::after, ::before {
+    box-sizing: border-box;
+}
