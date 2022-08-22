@@ -8,8 +8,8 @@ const MyRoutes = () => {
     return(
 
             <Routes>
-                <Route element = { <Home/> }  path="/" />
-                <Route element = { <Settings/> }  path="/settings" />
+                <Route path="/"  element = {<Home/>} />
+                <Route path="/settings" element = {<Settings/>} />
             </Routes>
 
     )

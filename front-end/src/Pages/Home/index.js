@@ -1,19 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { Card} from "react-bootstrap";
-import CardHeader from "react-bootstrap/esm/CardHeader";
+import React from "react";
+import ClusterServices from "../../Components/ClusterServices";
 
-import Metrics from "../../Services/Api";
-
-
-const Home = () => {
-
-    
+const Home = () => {   
     return (
         <>   
-            <Card>
-                <CardHeader>Home</CardHeader>
-                <Card.Body>teste</Card.Body>
-            </Card>        
+
+            <div style={{ marginTop:'20px', boxShadow:'0 4px 8px 0 rgba(97, 94, 94, 0.2), 0 6px 20px 0 rgba(22, 21, 21, 0.19)', border:'none'}}>
+                <ClusterServices />
+            </div>        
             
         </>
     )
