@@ -29,5 +29,42 @@ const formTimeStampToHours = (timesStamp) => {
     return formattedTime;
 }
 
+const formatBytes = (bytes, decimals = 2) => {
+    if (bytes === 0) return '0 Bytes';
 
-export default {formatTimesStampToDateTime, formTimeStampToHours};
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+const styleGauge = (value) => {
+    
+    const rotateValue = (Number(value)*180)/100;
+
+    const styleSucess = {
+        backgroundColor: '#009578',
+        transform: `rotate(${rotateValue}deg)`
+    }
+    const styleWorning = {
+        backgroundColor: '#F79F1B',
+        transform: `rotate(${rotateValue}deg)`
+    }
+
+    const styleDanger = {
+        backgroundColor: '#F13424D',
+        transform: `rotate(${rotateValue}deg)`
+    }
+
+    let style = null;
+
+    if(rotateValue <= 126) return style = styleSucess;
+    if(rotateValue > 126 && rotateValue <= 135) return style = styleWorning;
+    if(rotateValue > 135)  return style = styleDanger;
+}
+
+
+export default {formatTimesStampToDateTime, formTimeStampToHours, formatBytes, styleGauge};

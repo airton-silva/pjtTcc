@@ -123,7 +123,7 @@ def home():
     resp = coletar_dados_prometheus('CPU', 'machine_cpu_cores')
     return resp
 
-@app.route('/consumo-total-cpu', methods=['GET'])
+@app.route('/cpu-usage', methods=['GET'])
 def cpuConsumoTotal():
 
     resp = coletar_dados_prometheus('CPU', 'consumo_total_cpu',' ')
@@ -139,11 +139,11 @@ def percentMemory():
     resp = coletar_dados_prometheus('Memory', 'consumo_percent_memory',' ')
     return resp
 
-@app.route('/memoria', methods=['GET'])
+@app.route('/memory', methods=['GET'])
 def memory():
     resp = coletar_dados_prometheus('Memory', 'machine_memory_bytes',' ')
     return resp
-@app.route('/memoria_usada', methods=['GET'])
+@app.route('/memory-usage', methods=['GET'])
 def memory_usage():
     resp = coletar_dados_prometheus('Memory', 'container_memoryWorking_set_bytes',' ')
     return resp
@@ -153,7 +153,7 @@ def percentFilesystem():
     resp = coletar_dados_prometheus('FileSystem', 'consumo_percent_filesystem')
     return resp
 
-@app.route('/filesystem_usado', methods=['GET'])
+@app.route('/filesystem_usage', methods=['GET'])
 def filesystemConsume():
     resp = coletar_dados_prometheus('FileSystem', 'consumo_total_filesystem', '')
     return resp
