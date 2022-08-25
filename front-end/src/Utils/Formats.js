@@ -17,7 +17,7 @@ const formTimeStampToHours = (timesStamp) => {
     // multiplied by 1000 so that the argument is in milliseconds, not seconds.
     var date = new Date(timesStamp * 1000);
     // Hours part from the timestamp
-    var hours = date.getHours();
+    var hours = date.getHours()+3;
     // Minutes part from the timestamp
     var minutes = "0" + date.getMinutes();
     // Seconds part from the timestamp
@@ -63,7 +63,7 @@ const styleGauge = (value) => {
 
     if(rotateValue <= 126) return style = styleSucess;
     if(rotateValue > 126 && rotateValue <= 135) return style = styleWorning;
-    if(rotateValue > 135)  return style = styleDanger;
+    if(rotateValue > 135) return style = styleDanger;
 }
 
 

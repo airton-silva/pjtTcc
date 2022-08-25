@@ -129,6 +129,11 @@ def cpuConsumoTotal():
     resp = coletar_dados_prometheus('CPU', 'consumo_total_cpu',' ')
     return resp    
 
+@app.route('/cpu/container', methods=['GET'])
+def cpuBycontainer():
+    resp = coletar_dados_prometheus('CPU', 'consume_cpu_by_container')
+    return resp
+
 @app.route('/Pods', methods=['GET'])
 def pods():
     resp = coletar_dados_prometheus('Pods', 'cpu_usage_seconds_total',' ')
@@ -170,7 +175,7 @@ def memory_metric(metric):
     resp = search_metric('Memory', metric, '&time=1654190349.862')
     return resp
 
-@app.route('/rede/<metric>/', methods=['GET'])
+@app.route('/network/<metric>/', methods=['GET'])
 def rede_metric(metric):
     data = datetime.now() # intante atual
     nowForm = (str(data).replace(' ', 'T'))
@@ -188,6 +193,29 @@ def rede_metric(metric):
 
     resp = search_metric('rede', metric, rangeTime)
     return resp
+
+@app.route('/network/io/', methods=['GET'])
+def rede_io():
+    data = datetime.now() # intante atual
+    nowForm = (str(data).replace(' ', 'T'))
+    startAt = nowForm[:23]+'Z'
+
+    interval = datetime.now() - timedelta(minutes=5) #subtraindo 5 minutos do instante atual
+    intvalForm = (str(interval).replace(' ', 'T'))
+    endAt = intvalForm[:23]+'Z'
+
+    print("start", intvalForm)
+
+    print("stop", startAt)
+    
+    rangeTime = '&start='+endAt+'&end='+startAt+'&step=15s'  
+
+    receive = search_metric('rede', 'receive', rangeTime)
+    sent = search_metric('rede', 'sent', rangeTime)
+    
+    result ={'receive': receive['data']['result'], 'sent':sent['data']['result']}
+
+    return result
     
 
 @app.route('/rede', methods=['GET'])
