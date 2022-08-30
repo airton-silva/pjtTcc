@@ -23,7 +23,7 @@ METRICAS = {
     'rede': {
         'recebido': 'container_network_receive_bytes_total',
         'receive': 'sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~"^.*$"}[1m]))',
-        'sent': '- sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~"^.*$"}[1m]))'
+        'sent': '- sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~"^.*$"}[1m]))',
         # 'receive': 'sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~"^.*$"}[1m]))',
         # 'receive': 'sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname="dti-d610"}[1m]))',
         # 'sent' : '- sum (rate (container_network_transmit_bytes_total{kubernetes_io_hostname="dti-d610"}[1m]))'
@@ -41,7 +41,8 @@ METRICAS = {
         'machine_cpu_cores':"machine_cpu_cores",
         'consumo_total_cpu':'sum (rate (container_cpu_usage_seconds_total{id="/",kubernetes_io_hostname=~"^.*$"}[1m]))',
         'container_spec_cpu_period':'container_spec_cpu_period{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
-        'consume_cpu_by_container':'sum (rate (container_cpu_usage_seconds_total{image!=\'\',name=~\'^k8s_.*\',container!=\'POD\',kubernetes_io_hostname=~\'^.*$\',namespace=~\'^(boutique|default|kube-node-lease|kube-public|kube-system|monitoring|simple-bank|teashop)$\'}[1m]))',
+        'consume_cpu_by_container':'sum (rate (container_cpu_usage_seconds_total{image!="",name!~"^k8s_.*",kubernetes_io_hostname=~"^.*$",namespace=~"^(boutique|default|kube-node-lease|kube-public|kube-system|monitoring|simple-bank|teashop)$"}[1m])) by (kubernetes_io_hostname, name, image)',
+        
         # 'usage_seconds_total':'rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m])',
         # 'usage_seconds_total_norm':'rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"})',
         # 'container_cpu_usage_seconds_total':'sum (rate (container_cpu_usage_seconds_total{image!="",name=~"^k8s_.*",container!="POD",kubernetes_io_hostname=~"dti-d610",namespace=~"default"}[1m])) by (container, pod)',

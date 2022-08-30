@@ -30,16 +30,20 @@ db=SQLAlchemy(app)
 class ModelPreferences(db.Model):
     __tablename__ = 'preferences'
     id = db.Column(db.Integer, primary_key=True)
-    metric = db.Column(db.String(100))
-    type = db.Column(db.String(100))
+    name = db.Column(db.String(50))
+    metric = db.Column(db.String(50))
+    type = db.Column(db.String(20))
+    value_failure = db.Column(db.String(20))
     create_at = db.Column(db.DateTime)
     update_at = db.Column(db.DateTime)
 
     def to_dict(self):
         return {
             'id': self.id,
+            'name': self.name,
             'metric': self.metric,
             'type': self.type,
+            'value_failure': self.value_failure,
             'create_at': self.create_at,
             'update_at': self.update_at
         }
@@ -59,8 +63,10 @@ def create_preferences():
     data = request.get_json()
     try:
         preference = ModelPreferences(
+            name= data['name'],
             metric=data['metric'],
             type=data['type'],
+            value_failure = data['value_failure'],
             create_at=data['create_at'],
             update_at=data['update_at']
         )
@@ -76,8 +82,10 @@ def update_preferences(id):
     data = request.get_json()
     try:
         preference = ModelPreferences.query.get(id)
+        preference.name= data['name'],
         preference.metric = data['metric']
         preference.type = data['type']
+        preference.value_failure = data['value_failure'],
         preference.create_at = data['create_at']
         preference.update_at = data['update_at']
         db.session.commit()
@@ -131,7 +139,8 @@ def cpuConsumoTotal():
 
 @app.route('/cpu/container', methods=['GET'])
 def cpuBycontainer():
-    resp = coletar_dados_prometheus('CPU', 'consume_cpu_by_container')
+    consumeBycontainer = coletar_dados_prometheus('CPU', 'consume_cpu_by_container')    
+    resp ={'cpu_consume': consumeBycontainer['data']['result']}
     return resp
 
 @app.route('/Pods', methods=['GET'])

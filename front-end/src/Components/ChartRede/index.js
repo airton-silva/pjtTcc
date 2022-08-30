@@ -7,13 +7,12 @@ import Formats from "../../Utils/Formats";
 const ChartRede = () => {
 
     const [networkIO, setNetworkIO] = React.useState({})
-    const [receive, setReceive] = React.useState([]);
-    const [sent, setSent] = React.useState([]);
+    const [dataSet, setDataSet] = React.useState([]);
 
 
     const getNetworkIO = async () => {
         try {
-            const testData = [["Tempo", "Receive", "Sent"]];
+            const data = [["Tempo", "Receive", "Sent"]];
             const resp = await api.get('/network/io');
             const response = resp.data;
             const { receive, sent } = response;
@@ -23,11 +22,11 @@ const ChartRede = () => {
                 const [time, receiveValue] = receive;
                 const sentInTime = sentValues.find(sent => sent[0] === time);
                 const sentValue = sentInTime && sentInTime.length ? sentInTime[1] : -1
-                testData.push([Formats.formTimeStampToHours(time), Number(receiveValue), Number(sentValue)])
+                data.push([Formats.formTimeStampToHours(time), Number(receiveValue), Number(sentValue)])
             })
             // console.log({ receiveValues, sentValues, times });
             setNetworkIO(response);
-            setSent(testData)
+            setDataSet(data)
         } catch (error) {
             console.error(error);
         }
@@ -38,16 +37,6 @@ const ChartRede = () => {
         getNetworkIO();
 
     }, []);
-
-    // const dataSet = [["Hora", "KB"], [4, 5.5], [8, 12]];
-    // console.log(dataSet);
-    const data = [
-        ["Year", "Sales", "Expenses"],
-        ["2004", 1000, 400],
-        ["2005", 1170, 460],
-        ["2006", 660, 1120],
-        ["2007", 1030, 540],
-    ];
 
     const options = {
         width: "100%",
@@ -75,7 +64,7 @@ const ChartRede = () => {
                     <Card.Body>
                         <Chart
                             chartType={"LineChart"}
-                            data={sent}
+                            data={dataSet}
                             options={options}
                             legendToggle
                         />

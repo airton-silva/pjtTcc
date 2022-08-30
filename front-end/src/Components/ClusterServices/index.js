@@ -29,7 +29,7 @@ const ClusterServices = () => {
             <div>
                 <Card className="text-center">
                     <Card.Header as ="h4"> Serviços Rodando no Cluster </Card.Header>
-                    <Table responsive>
+                    <Table responsive hover size="sm">
                         
                         <thead>
                             <tr>
