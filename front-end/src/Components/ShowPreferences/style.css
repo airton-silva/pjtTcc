@@ -1,0 +1,14 @@
+.close::before{
+    content: 'x';
+    visibility: visible;
+    color: "#000875";
+}
+
+.close{
+    position: absolute;
+    right: 32px;
+    top: 17px;
+    width: 20px;
+    height: 20px;
+    background-color: transparent;
+}
