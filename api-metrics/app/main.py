@@ -24,14 +24,14 @@ METRICAS = {
         'recebido': 'container_network_receive_bytes_total',
         'receive': 'sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~"^.*$"}[1m]))',
         'sent': '- sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~"^.*$"}[1m]))',
-        # 'receive': 'sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~"^.*$"}[1m]))',
-        # 'receive': 'sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname="dti-d610"}[1m]))',
-        # 'sent' : '- sum (rate (container_network_transmit_bytes_total{kubernetes_io_hostname="dti-d610"}[1m]))'
+        'container_network_transmit_bytes_total': 'container_network_transmit_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
+        'container_network_receive_bytes_total' : 'container_network_receive_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}'
+
     },
 
     'Request': {
-        'request_duration_seconds_count':'sum(rate(http_request_duration_seconds_bucket{job="kube-state-metrics"}[5m]))',
-        'http_requests_total': 'http_requests_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[5m]',
+        'request_duration_seconds_count':'sum(rate(http_request_duration_seconds_bucket{job="kube-state-metrics"}))',
+        'http_requests_total': 'request_duration_seconds_count{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
 
     },
 
@@ -40,16 +40,14 @@ METRICAS = {
         'container_cpu_usage_seconds_total':'container_cpu_usage_seconds_total',
         'machine_cpu_cores':"machine_cpu_cores",
         'consumo_total_cpu':'sum (rate (container_cpu_usage_seconds_total{id="/",kubernetes_io_hostname=~"^.*$"}[1m]))',
-        'container_spec_cpu_period':'container_spec_cpu_period{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
+        'container_spec_cpu_period_teastore-webui-5d9c74d9d6-9lrw5':'container_spec_cpu_period{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
         'consume_cpu_by_container':'sum (rate (container_cpu_usage_seconds_total{image!="",name!~"^k8s_.*",kubernetes_io_hostname=~"^.*$",namespace=~"^(boutique|default|kube-node-lease|kube-public|kube-system|monitoring|simple-bank|teashop)$"}[1m])) by (kubernetes_io_hostname, name, image)',
-        
-        # 'usage_seconds_total':'rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m])',
-        # 'usage_seconds_total_norm':'rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"})',
-        # 'container_cpu_usage_seconds_total':'sum (rate (container_cpu_usage_seconds_total{image!="",name=~"^k8s_.*",container!="POD",kubernetes_io_hostname=~"dti-d610",namespace=~"default"}[1m])) by (container, pod)',
+        'container_cpu_usage_seconds_total_teastore-webui-5d9c74d9d6-9lrw5':'container_spec_cpu_period{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}', 
+
     },
     'Memory':{
         # 'usage_bytes_total':'container_memory_usage_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
-        # 'usage_bytes_total_norm':'container_memory_usage_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
+        'container_memoryWorking_set_bytes_teastore-webui-5d9c74d9d6-9lrw5':'container_memory_working_set_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
         'machine_memory_bytes': 'sum (machine_memory_bytes{kubernetes_io_hostname=~\'^.*$\'})', # memoria da maquina 
         'container_memoryWorking_set_bytes':'sum (container_memory_working_set_bytes{id="/",kubernetes_io_hostname="dti-d610"})', # consumo de memória in bytes
         'consumo_percent_memory': 'sum (container_memory_working_set_bytes{id="/",kubernetes_io_hostname="dti-d610"}) / sum (machine_memory_bytes{kubernetes_io_hostname="dti-d610"}) * 100', # consumo em percentagem
@@ -58,9 +56,13 @@ METRICAS = {
         'consumo_percent_filesystem': 'sum (container_fs_usage_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/",kubernetes_io_hostname="dti-d610"}) / sum (container_fs_limit_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/",kubernetes_io_hostname="dti-d610"}) * 100',
         'consumo_total_filesystem': 'sum (container_fs_usage_bytes{device=~\"^/dev/[sv]d[a-z][1-9]$\",id=\"/\",kubernetes_io_hostname=~\"^.*$\"})',
         'container_fs_limit_bytes' : 'sum (container_fs_limit_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/",kubernetes_io_hostname=~\"^.*$\"})',
+        'container_fs_reads_bytes_total_teastore-webui-5d9c74d9d6-9lrw5': 'container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
+        'container_fs_writes_bytes_total_teastore-webui-5d9c74d9d6-9lrw5': 'container_fs_writes_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
+        # 'container_fs_reads_bytes_total_teastore-webui-5d9c74d9d6-9lrw5': 'sum(rate(container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m]))'
     },
 
     'Pods':{
+        'kube_pod_labels':'kube_pod_labels',
         'cpu_usage_seconds_total':'sum(rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m])) by (container, pod)',
     },
     'histogram':{
@@ -76,10 +78,26 @@ METRICAS = {
         'kube_node_info':'kube_node_info',
     },
 
-
-
-
 }  
+def gerarQueryPreferences (identify: str, type: str, metric: str, pod: str) :
+    create_query = f"{identify}: rate ({type}"+'{"kubernetes_io_hostname="dti-d610", pod="'+f"{pod}"+'"})'
+    return create_query
+# usage_seconds_total_norm':'rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"})
+
+def gerarMetadata () -> dict:
+    url = API_PROMETHEUS+'metadata'
+    dados = requisitar_prometheus(url)
+    dados_processados = processar_dados(dados)
+
+    return dados_processados
+
+# def filter_set(aquarium_creatures, search_string):
+# 	def iterator_func(x):
+# 		for v in x.values():
+# 			if search_string in v:
+# 				return True
+# 		return False
+# 	return filter(iterator_func, aquarium_creatures)    
 
 def buscar(query: str)-> dict:
     """Busca metricas no Prometheus.

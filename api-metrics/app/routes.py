@@ -2,7 +2,11 @@ from ast import Str
 from crypt import methods
 from dataclasses import replace
 from hmac import new
+from importlib import metadata
 from os import times
+from this import s
+from urllib import response
+import time
 # from urllib import response
 from flask import Flask, Response, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -10,7 +14,7 @@ from datetime import datetime, timedelta
 from flask_cors import CORS
 from main import coletar_dados_prometheus
 from main import getTargets
-from main import search_metric, buscar
+from main import search_metric, buscar, gerarMetadata, gerarQueryPreferences
 
 # from main import gerar_response
 
@@ -31,9 +35,12 @@ class ModelPreferences(db.Model):
     __tablename__ = 'preferences'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50))
+    name_pod = db.Column(db.String(50))
     metric = db.Column(db.String(50))
-    type = db.Column(db.String(20))
+    type = db.Column(db.String(50))
     value_failure = db.Column(db.String(20))
+    period_time = db.Column(db.String(20))
+    myquery = db.Column(db.String(255))
     create_at = db.Column(db.DateTime)
     update_at = db.Column(db.DateTime)
 
@@ -41,9 +48,12 @@ class ModelPreferences(db.Model):
         return {
             'id': self.id,
             'name': self.name,
+            'name_pod':self.name_pod,
             'metric': self.metric,
             'type': self.type,
             'value_failure': self.value_failure,
+            'period_time' : self.period_time,
+            'myquery': self.myquery,
             'create_at': self.create_at,
             'update_at': self.update_at
         }
@@ -61,18 +71,23 @@ def get_preferences():
 @app.route('/preferences', methods=['POST'])
 def create_preferences():
     data = request.get_json()
+    print(data)
     try:
         preference = ModelPreferences(
             name= data['name'],
+            name_pod= data['name_pod'],
             metric=data['metric'],
             type=data['type'],
             value_failure = data['value_failure'],
+            period_time = data['period_time'],
+            myquery= gerarQueryPreferences(data['name_pod']+'_'+data['type'] ,data['type'],data['metric'],data['name_pod']),
             create_at=data['create_at'],
             update_at=data['update_at']
         )
         db.session.add(preference)
         db.session.commit()
         return jsonify(preference.to_dict())
+        
     except Exception as e:
         return jsonify(str(e))
 
@@ -83,9 +98,11 @@ def update_preferences(id):
     try:
         preference = ModelPreferences.query.get(id)
         preference.name= data['name'],
-        preference.metric = data['metric']
+        preference.name_pod= data['name_pod']
+        preference.metric = data['metric'],
         preference.type = data['type']
         preference.value_failure = data['value_failure'],
+        preference.period_time = data['period_time'],
         preference.create_at = data['create_at']
         preference.update_at = data['update_at']
         db.session.commit()
@@ -113,7 +130,41 @@ def get_preferences_id(id):
     else:
         return jsonify({'message': 'Preference not found'})
 
+# @app.route('/preferences/fail', methods=['GET'])
+# def get_preferences_Fail():
+
+    # preferenceCPU = ModelPreferences.query.filter_by(metric='CPU').all()
+    # print(preferenceCPU)
+    # if preferenceCPU:
+    #     return jsonify(preferenceCPU.to_dict())
+    # else:
+    #     return jsonify({'message': 'Preference not found'})
+
 # Fim Routes Preferences
+@app.route('/preferences/merge', methods=['GET'])
+def get_preferences_merge():
+    consumeCpuByContainer = coletar_dados_prometheus('CPU', 'container_cpu_usage_seconds_total_teastore-webui-5d9c74d9d6-9lrw5')  
+    consumeMemoryByContainer = coletar_dados_prometheus('Memory', 'container_memoryWorking_set_bytes_teastore-webui-5d9c74d9d6-9lrw5')
+
+ 
+    FileSystem ={
+        'reads': coletar_dados_prometheus('FileSystem', 'container_fs_reads_bytes_total_teastore-webui-5d9c74d9d6-9lrw5')['data']['result'],
+        'writes':coletar_dados_prometheus('FileSystem', 'container_fs_writes_bytes_total_teastore-webui-5d9c74d9d6-9lrw5')['data']['result']
+
+    }
+    netWork ={
+        'transmit_bytes' : coletar_dados_prometheus('rede', 'container_network_transmit_bytes_total')['data']['result'],
+        'receive_bytes': coletar_dados_prometheus('rede', 'container_network_receive_bytes_total')['data']['result']
+    }
+    teastore_webui_5d9c74d9d6_9lrw5 ={'teastore_webui_5d9c74d9d6_9lrw5': {
+            'CPU': consumeCpuByContainer['data']['result'],
+            'MEMORY': consumeMemoryByContainer['data']['result'],
+            'FileSystem': FileSystem,
+            'Network': netWork,
+            }
+        }
+    return teastore_webui_5d9c74d9d6_9lrw5
+
 
 @app.route('/')
 def index():
@@ -143,9 +194,11 @@ def cpuBycontainer():
     resp ={'cpu_consume': consumeBycontainer['data']['result']}
     return resp
 
-@app.route('/Pods', methods=['GET'])
+@app.route('/pods', methods=['GET'])
 def pods():
-    resp = coletar_dados_prometheus('Pods', 'cpu_usage_seconds_total',' ')
+    # data = datetime.now()
+    # timesStamp = (time.mktime(data.timetuple()))
+    resp = coletar_dados_prometheus('Pods', 'kube_pod_labels', '')
     return resp
 
 @app.route('/percent-memory', methods=['GET'])
@@ -176,6 +229,11 @@ def filesystemConsume():
 @app.route('/filesystem', methods=['GET'])
 def filesystem():
     resp = coletar_dados_prometheus('FileSystem', 'container_fs_limit_bytes', '')
+    return resp
+
+@app.route('/filesystem/ct', methods=['GET'])
+def filesystem_ct():
+    resp = coletar_dados_prometheus('FileSystem', 'container_fs_writes_bytes_total', '')
     return resp
 
 @app.route('/memoria/<metric>', methods=['GET'])
@@ -234,7 +292,7 @@ def rede():
 
 @app.route('/request', methods=['GET'])
 def requests():
-    resp = coletar_dados_prometheus('Request', 'request_duration_seconds_count',' ')
+    resp = coletar_dados_prometheus('Request', 'http_requests_total',' ')
     return resp
 
 @app.route('/histograma', methods=['GET'])
@@ -256,5 +314,15 @@ def namespaces():
 def source(query):
     resp = buscar(query)
     return resp
-    
+
+@app.route('/metadata', methods=['GET'])
+def metadatas():
+    resp = gerarMetadata()
+    return resp
+
+# @app.route('/', methods=['GET'])    
+# def discoveredLabel():
+#     resp = getTargets('targets?discoveredLabels?__meta_kubernetes_endpoints_name')
+#     return resp
+
 app.run()
