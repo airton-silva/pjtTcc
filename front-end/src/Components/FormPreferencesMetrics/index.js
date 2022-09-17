@@ -20,8 +20,6 @@ const FormPreferences = (prop) => {
     const [types, setTypes] = React.useState([]);
     const [typeMetric, setTypeMetric] = React.useState([]);
     const [pods, setPods] = React.useState([]);
-
-    const [definitionFail, setDefinitionFail] = React.useState({});
     
     const createPreferences = async (event) => {
         event.preventDefault();
@@ -86,12 +84,50 @@ const FormPreferences = (prop) => {
 
             const resp = await api.get(`preferences/${id}`);
             const response = resp.data; 
-            setDefinitionFail(response);
+            
+            setName(response.name);
+            setMetric(response.metric);            
+            setNamePod(response.name_pod);
+            setType(response.type);
+            setValueFailure(response.value_failure);
+            setPeriodTime(response.period_time);
+
+
                             
         } catch (error) {
             console.log(error);
             
         }
+
+    }
+
+    const updatePreferences = async (event) => {
+        event.preventDefault();
+
+        var now = Formats.formatTimesStampToDateTimeEUA(Date.now());
+        const data = {
+            "name":name,
+            "name_pod": namePod,
+            "metric": metric,
+            "type": type,
+            "value_failure": valueFailure,
+            "period_time": periodTime,
+            "create_at": now,
+            "update_at":now,
+    
+        };
+
+
+        try {
+            const resp = await api.put(`/preferences/${preferenceId}`, data);
+            alert("Atualização de Preferencias id = "+ resp.data.id+ "\nRealizada com sucesso");
+            show = "none";
+
+        } catch (error) {
+            console.log(error);
+            
+        }
+
 
     }
     // console.log(definitionFail);
@@ -111,6 +147,14 @@ const FormPreferences = (prop) => {
        
     };
 
+    const saveOrUpdate = (e) =>{
+        if(show === null && preferenceId > 0){
+            updatePreferences(e);
+        }else{
+            createPreferences(e);
+        }
+    }
+
     React.useEffect(() => {
         getTypesMetrics();
         getPods();
@@ -128,7 +172,7 @@ const FormPreferences = (prop) => {
                 <Card className="text-center">
                     <Card.Header as="h4">Cadastro de padrões considerados como falhas {preferenceId}</Card.Header>
                     <Card.Body>
-                        <Form  onSubmit={createPreferences}>
+                        <Form  onSubmit={saveOrUpdate}>
                             <Row className="mb-3">
                                 <Form.Group as={Col} md="4" controlId="validationCustom01">
                                     <Form.Label>Nome</Form.Label>
