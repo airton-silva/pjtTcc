@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import FormPreferences from "../../Components/FormPreferencesMetrics";
 import ShowPreferences from "../../Components/ShowPreferences";
+import ShowPreferencesMerge from "../../Components/PreferencesMerge";
 
 
 const Settings = () => {
@@ -34,6 +35,7 @@ const Settings = () => {
                 <div>
                     <ShowPreferences />
                 </div>
+              
 
             </div>
 
