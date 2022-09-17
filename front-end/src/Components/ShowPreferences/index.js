@@ -62,7 +62,7 @@ const ShowPreferences = () => {
                                     <th>Metrica</th> 
                                     <th>Tipo</th> 
                                     <th>Vlr. de Falha</th>
-                                    <th>Vlr. Medio</th>
+                                    <th>Intervalo Tempo</th>
                                     <th>Opções</th>
                         
                                 </tr>
