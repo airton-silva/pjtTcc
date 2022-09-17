@@ -163,7 +163,7 @@ const PreferencesMerge = () => {
 
                             </Col>
                             <Col md={{ span: 1, offset: 4}}>
-                                <h4><AiOutlineDown onClick={() => { handleCard(1, openCardDiskRc) }} /></h4>
+                                <h4><AiOutlineDown onClick={() => { handleCard(2, openCardDiskRc) }} /></h4>
                             
                             </Col>
                         </Row>

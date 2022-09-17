@@ -4,6 +4,7 @@ from typing import Tuple, Dict
 # from flask import Flask, Response, request, jsonify
 # import random
 # import time
+# from routes import myDatasource
 
 from json import loads
 from requests import get
@@ -15,8 +16,14 @@ from requests import get
 
     # return loads(get(request_prometheus_api).text) 
 
+
 PROMETHEUS_KUBE_PROMETHEUS = 'http://200.129.62.190:30000/api/v1/query?query='
 API_PROMETHEUS = 'http://200.129.62.190:30000/api/v1/'
+# API_PROMETHEUS = data_source()
+
+def data_source (url: str):
+    print (url)
+    return url
 
 
 METRICAS = {
@@ -24,8 +31,6 @@ METRICAS = {
         'recebido': 'container_network_receive_bytes_total',
         'receive': 'sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~"^.*$"}[1m]))',
         'sent': '- sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~"^.*$"}[1m]))',
-        'container_network_transmit_bytes_total': 'container_network_transmit_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
-        'container_network_receive_bytes_total' : 'container_network_receive_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}'
 
     },
 
@@ -39,15 +44,12 @@ METRICAS = {
         'consumo_percent_cpu': 'sum (rate (container_cpu_usage_seconds_total{id="/",kubernetes_io_hostname="dti-d610"}[1m])) / sum (machine_cpu_cores{kubernetes_io_hostname="dti-d610"}) * 100', # consumo em percentagem
         'container_cpu_usage_seconds_total':'container_cpu_usage_seconds_total',
         'machine_cpu_cores':"machine_cpu_cores",
-        'consumo_total_cpu':'sum (rate (container_cpu_usage_seconds_total{id="/",kubernetes_io_hostname=~"^.*$"}[1m]))',
-        'container_spec_cpu_period_teastore-webui-5d9c74d9d6-9lrw5':'container_spec_cpu_period{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
         'consume_cpu_by_container':'sum (rate (container_cpu_usage_seconds_total{image!="",name!~"^k8s_.*",kubernetes_io_hostname=~"^.*$",namespace=~"^(boutique|default|kube-node-lease|kube-public|kube-system|monitoring|simple-bank|teashop)$"}[1m])) by (kubernetes_io_hostname, name, image)',
-        'container_cpu_usage_seconds_total_teastore-webui-5d9c74d9d6-9lrw5':'container_spec_cpu_period{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}', 
+        'consumo_total_cpu':'sum (rate (container_cpu_usage_seconds_total{id="/",kubernetes_io_hostname=~"^.*$"}[1m]))',
 
     },
     'Memory':{
         # 'usage_bytes_total':'container_memory_usage_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
-        'container_memoryWorking_set_bytes_teastore-webui-5d9c74d9d6-9lrw5':'container_memory_working_set_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
         'machine_memory_bytes': 'sum (machine_memory_bytes{kubernetes_io_hostname=~\'^.*$\'})', # memoria da maquina 
         'container_memoryWorking_set_bytes':'sum (container_memory_working_set_bytes{id="/",kubernetes_io_hostname="dti-d610"})', # consumo de memória in bytes
         'consumo_percent_memory': 'sum (container_memory_working_set_bytes{id="/",kubernetes_io_hostname="dti-d610"}) / sum (machine_memory_bytes{kubernetes_io_hostname="dti-d610"}) * 100', # consumo em percentagem
@@ -56,14 +58,68 @@ METRICAS = {
         'consumo_percent_filesystem': 'sum (container_fs_usage_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/",kubernetes_io_hostname="dti-d610"}) / sum (container_fs_limit_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/",kubernetes_io_hostname="dti-d610"}) * 100',
         'consumo_total_filesystem': 'sum (container_fs_usage_bytes{device=~\"^/dev/[sv]d[a-z][1-9]$\",id=\"/\",kubernetes_io_hostname=~\"^.*$\"})',
         'container_fs_limit_bytes' : 'sum (container_fs_limit_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/",kubernetes_io_hostname=~\"^.*$\"})',
-        'container_fs_reads_bytes_total_teastore-webui-5d9c74d9d6-9lrw5': 'container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
-        'container_fs_writes_bytes_total_teastore-webui-5d9c74d9d6-9lrw5': 'container_fs_writes_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
         # 'container_fs_reads_bytes_total_teastore-webui-5d9c74d9d6-9lrw5': 'sum(rate(container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m]))'
     },
 
     'Pods':{
         'kube_pod_labels':'kube_pod_labels',
-        'cpu_usage_seconds_total':'sum(rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m])) by (container, pod)',
+        'cpu_usage_seconds_total':'sum(rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m]))',
+        'container_spec_cpu_period':'container_spec_cpu_period{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
+        
+        # teastore-webui-5d9c74d9d6-9lrw5 -
+        'container_network_transmit_bytes_total_teastore-webui-5d9c74d9d6-9lrw5': 'container_network_transmit_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
+        'container_network_receive_bytes_total_teastore-webui-5d9c74d9d6-9lrw5' : 'container_network_receive_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}',
+        'container_cpu_usage_seconds_total_teastore-webui-5d9c74d9d6-9lrw5':'sum(rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m]))', 
+        'container_memoryWorking_set_bytes_teastore-webui-5d9c74d9d6-9lrw5':'sum(rate(container_memory_working_set_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m]))',
+        'container_fs_writes_bytes_total_teastore-webui-5d9c74d9d6-9lrw5': 'sum(rate(container_fs_writes_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m]))',
+        'container_fs_reads_bytes_total_teastore-webui-5d9c74d9d6-9lrw5': 'sum(rate(container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m]))',
+        # teastore-db-5d9555684f-w64kj - 
+        'container_network_transmit_bytes_total_teastore-db-5d9555684f-w64kj': 'container_network_transmit_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-db-5d9555684f-w64kj"}',
+        'container_network_receive_bytes_total_teastore-db-5d9555684f-w64kj' : 'container_network_receive_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-db-5d9555684f-w64kj"}',
+        'container_cpu_usage_seconds_total_teastore-db-5d9555684f-w64kj':'sum(rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-db-5d9555684f-w64kj"}[1m]))', 
+        'container_memoryWorking_set_bytes_teastore-db-5d9555684f-w64kj':'sum(rate(container_memory_working_set_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-db-5d9555684f-w64kj"}[1m]))',
+        'container_fs_writes_bytes_total_teastore-db-5d9555684f-w64kj': 'sum(rate(container_fs_writes_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-db-5d9555684f-w64kj"}[1m]))',
+        'container_fs_reads_bytes_total_teastore-db-5d9555684f-w64kj': 'sum(rate(container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-db-5d9555684f-w64kj"}[1m]))',
+        # teastore-image-74cc7d64c5-6bppm
+        'container_network_transmit_bytes_total_teastore-image-74cc7d64c5-6bppm': 'container_network_transmit_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-image-74cc7d64c5-6bppm"}',
+        'container_network_receive_bytes_total_teastore-image-74cc7d64c5-6bppm' : 'container_network_receive_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-image-74cc7d64c5-6bppm"}',
+        'container_cpu_usage_seconds_total_teastore-image-74cc7d64c5-6bppm':'sum(rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-image-74cc7d64c5-6bppm"}[1m]))', 
+        'container_memoryWorking_set_bytes_teastore-image-74cc7d64c5-6bppm':'sum(rate(container_memory_working_set_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-image-74cc7d64c5-6bppm"}[1m]))',
+        'container_fs_writes_bytes_total_teastore-image-74cc7d64c5-6bppm': 'sum(rate(container_fs_writes_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-image-74cc7d64c5-6bppm"}[1m]))',
+        'container_fs_reads_bytes_total_teastore-image-74cc7d64c5-6bppm': 'sum(rate(container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-image-74cc7d64c5-6bppm"}[1m]))',
+        # teastore-persistence-6cc5b44f9d-wm8hn
+        'container_network_transmit_bytes_total_teastore-persistence-6cc5b44f9d-wm8hn': 'container_network_transmit_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-persistence-6cc5b44f9d-wm8hn"}',
+        'container_network_receive_bytes_total_teastore-persistence-6cc5b44f9d-wm8hn' : 'container_network_receive_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-persistence-6cc5b44f9d-wm8hn"}',
+        'container_cpu_usage_seconds_total_teastore-persistence-6cc5b44f9d-wm8hn':'sum(rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-persistence-6cc5b44f9d-wm8hn"}[1m]))', 
+        'container_memoryWorking_set_bytes_teastore-persistence-6cc5b44f9d-wm8hn':'sum(rate(container_memory_working_set_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-persistence-6cc5b44f9d-wm8hn"}[1m]))',
+        'container_fs_writes_bytes_total_teastore-persistence-6cc5b44f9d-wm8hn': 'sum(rate(container_fs_writes_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-persistence-6cc5b44f9d-wm8hn"}[1m]))',
+        'container_fs_reads_bytes_total_teastore-persistence-6cc5b44f9d-wm8hn': 'sum(rate(container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-persistence-6cc5b44f9d-wm8hn"}[1m]))',
+
+        # teastore-auth-7947675f98-rbk99
+        'container_network_transmit_bytes_total_teastore-auth-7947675f98-rbk99': 'container_network_transmit_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-auth-7947675f98-rbk99"}',
+        'container_network_receive_bytes_total_teastore-auth-7947675f98-rbk99' : 'container_network_receive_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-auth-7947675f98-rbk99"}',
+        'container_cpu_usage_seconds_total_teastore-auth-7947675f98-rbk99':'sum(rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-auth-7947675f98-rbk99"}[1m]))', 
+        'container_memoryWorking_set_bytes_teastore-auth-7947675f98-rbk99':'sum(rate(container_memory_working_set_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-auth-7947675f98-rbk99"}[1m]))',
+        'container_fs_writes_bytes_total_teastore-auth-7947675f98-rbk99': 'sum(rate(container_fs_writes_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-auth-7947675f98-rbk99"}[1m]))',
+        'container_fs_reads_bytes_total_teastore-auth-7947675f98-rbk99': 'sum(rate(container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-auth-7947675f98-rbk99"}[1m]))',
+
+        # teastore-recommender-794c699f5-v69gm
+        'container_network_transmit_bytes_total_teastore-recommender-794c699f5-v69gm': 'container_network_transmit_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-recommender-794c699f5-v69gm"}',
+        'container_network_receive_bytes_total_teastore-recommender-794c699f5-v69gm' : 'container_network_receive_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-recommender-794c699f5-v69gm"}',
+        'container_cpu_usage_seconds_total_teastore-recommender-794c699f5-v69gm':'sum(rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-recommender-794c699f5-v69gm"}[1m]))', 
+        'container_memoryWorking_set_bytes_teastore-recommender-794c699f5-v69gm':'sum(rate(container_memory_working_set_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-recommender-794c699f5-v69gm"}[1m]))',
+        'container_fs_writes_bytes_total_teastore-recommender-794c699f5-v69gm': 'sum(rate(container_fs_writes_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-recommender-794c699f5-v69gm"}[1m]))',
+        'container_fs_reads_bytes_total_teastore-recommender-794c699f5-v69gm': 'sum(rate(container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-recommender-794c699f5-v69gm"}[1m]))',
+
+        # teastore-registry-8bbbc8d7f-5kj9
+        'container_network_transmit_bytes_total_teastore-registry-8bbbc8d7f-5kj9': 'container_network_transmit_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-registry-8bbbc8d7f-5kj9"}',
+        'container_network_receive_bytes_total_teastore-registry-8bbbc8d7f-5kj9' : 'container_network_receive_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-registry-8bbbc8d7f-5kj9"}',
+        'container_cpu_usage_seconds_total_teastore-registry-8bbbc8d7f-5kj9':'sum(rate(container_cpu_usage_seconds_total{kubernetes_io_hostname="dti-d610", pod="teastore-registry-8bbbc8d7f-5kj9"}[1m]))', 
+        'container_memoryWorking_set_bytes_teastore-registry-8bbbc8d7f-5kj9':'sum(rate(container_memory_working_set_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-registry-8bbbc8d7f-5kj9"}[1m]))',
+        'container_fs_writes_bytes_total_teastore-registry-8bbbc8d7f-5kj9': 'sum(rate(container_fs_writes_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-registry-8bbbc8d7f-5kj9"}[1m]))',
+        'container_fs_reads_bytes_total_teastore-registry-8bbbc8d7f-5kj9': 'sum(rate(container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-registry-8bbbc8d7f-5kj9"}[1m]))',
+
+   
     },
     'histogram':{
         'request_duration_seconds_count':'sum(rate(http_request_duration_seconds_bucket{job="kube-state-metrics"}[1m])) by (le)',
@@ -89,15 +145,7 @@ def gerarMetadata () -> dict:
     dados = requisitar_prometheus(url)
     dados_processados = processar_dados(dados)
 
-    return dados_processados
-
-# def filter_set(aquarium_creatures, search_string):
-# 	def iterator_func(x):
-# 		for v in x.values():
-# 			if search_string in v:
-# 				return True
-# 		return False
-# 	return filter(iterator_func, aquarium_creatures)    
+    return dados_processados  
 
 def buscar(query: str)-> dict:
     """Busca metricas no Prometheus.

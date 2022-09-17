@@ -11,8 +11,8 @@ const CardTableMergeMetric = (prop) => {
         <>
             <Card className="text-center" >
                 <Card.Header as="h4">Metricas de {title}</Card.Header>
-                        <Card.Body>
-                            <Table responsive hover size="sm">
+                    <Card.Body>
+                        <Table responsive hover size="sm">
                                 
                                 <thead>
                                     <tr>                   
@@ -39,7 +39,7 @@ const CardTableMergeMetric = (prop) => {
                                 }                                            
                                     
                                 </tbody>
-                    </Table>
+                        </Table>
                 </Card.Body>
             </Card>
         </>

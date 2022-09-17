@@ -60,6 +60,62 @@ class ModelPreferences(db.Model):
  
 db.create_all()
 
+class ModelDataSources(db.Model):
+    __tablename__ = 'data_source'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    url = db.Column(db.String(50))
+    authType = db.Column(db.String(50))
+
+
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'url':self.url,
+            'authType': self.authType
+        }
+db.create_all()
+
+#datasource
+@app.route('/data_sources', methods=['GET'])
+def get_dataSources():
+    dataSources = ModelDataSources.query.all()
+    data = [dataSource.to_dict() for dataSource in dataSources]
+    return jsonify(data)
+
+def myDatasources():
+    datasource = ModelDataSources.filter_by(name='Prometheus')
+    return datasource
+
+@app.route('/data_sources', methods=['POST'])
+def create_dataSource():
+    data = request.get_json()
+    try:
+        dsource = ModelDataSources(
+            name= data['name'],
+            url= data['url'],
+            authType = data['authType']
+
+        )
+        db.session.add(dsource)
+        db.session.commit()
+        return jsonify(dsource.to_dict())
+        
+    except Exception as e:
+        return jsonify(str(e))
+
+@app.route('/data_sources/<int:id>', methods=['DELETE'])
+def delete_dataSource(id):
+    try:
+        datasource = ModelDataSources.query.get(id)
+        db.session.delete(datasource)
+        db.session.commit()
+        return jsonify(datasource.to_dict())
+    except Exception as e:
+        return jsonify(str(e))
+
 # Inicio Routes Preferences
 @app.route('/preferences', methods=['GET'])
 def get_preferences():
@@ -103,6 +159,7 @@ def update_preferences(id):
         preference.type = data['type']
         preference.value_failure = data['value_failure'],
         preference.period_time = data['period_time'],
+        preference.myquery = gerarQueryPreferences(data['name_pod']+'_'+data['type'] ,data['type'],data['metric'],data['name_pod']),
         preference.create_at = data['create_at']
         preference.update_at = data['update_at']
         db.session.commit()
@@ -141,29 +198,94 @@ def get_preferences_id(id):
     #     return jsonify({'message': 'Preference not found'})
 
 # Fim Routes Preferences
+
 @app.route('/preferences/merge', methods=['GET'])
 def get_preferences_merge():
-    consumeCpuByContainer = coletar_dados_prometheus('CPU', 'container_cpu_usage_seconds_total_teastore-webui-5d9c74d9d6-9lrw5')  
-    consumeMemoryByContainer = coletar_dados_prometheus('Memory', 'container_memoryWorking_set_bytes_teastore-webui-5d9c74d9d6-9lrw5')
+    # consumeCpuByContainer = coletar_dados_prometheus('Pods', 'container_cpu_usage_seconds_total_teastore-webui-5d9c74d9d6-9lrw5')  
+    # consumeMemoryByContainer = coletar_dados_prometheus('Pods', 'container_memoryWorking_set_bytes_teastore-webui-5d9c74d9d6-9lrw5')
 
- 
-    FileSystem ={
-        'reads': coletar_dados_prometheus('FileSystem', 'container_fs_reads_bytes_total_teastore-webui-5d9c74d9d6-9lrw5')['data']['result'],
-        'writes':coletar_dados_prometheus('FileSystem', 'container_fs_writes_bytes_total_teastore-webui-5d9c74d9d6-9lrw5')['data']['result']
+    CpuMetrics ={
+        'teastore_webui' : coletar_dados_prometheus('Pods', 'container_cpu_usage_seconds_total_teastore-webui-5d9c74d9d6-9lrw5')['data']['result'][0]['value'],
+        'teastore_db': coletar_dados_prometheus('Pods', 'container_cpu_usage_seconds_total_teastore-db-5d9555684f-w64kj')['data']['result'][0]['value'],
+        'teastore_image' : coletar_dados_prometheus('Pods', 'container_cpu_usage_seconds_total_teastore-image-74cc7d64c5-6bppm')['data']['result'][0]['value'],
+        'teastore_persistence': coletar_dados_prometheus('Pods', 'container_cpu_usage_seconds_total_teastore-persistence-6cc5b44f9d-wm8hn')['data']['result'][0]['value'],
+        'teastore_auth': coletar_dados_prometheus('Pods', 'container_cpu_usage_seconds_total_teastore-auth-7947675f98-rbk99')['data']['result'][0]['value'],
+        'teastore_recommender': coletar_dados_prometheus('Pods', 'container_cpu_usage_seconds_total_teastore-recommender-794c699f5-v69gm')['data']['result'][0]['value'],
+        'teastore_registry': coletar_dados_prometheus('Pods', 'container_cpu_usage_seconds_total_teastore-registry-8bbbc8d7f-5kj9')['data']['result'],
+
+    },
+
+    MemoryMetrics={
+        'teastore_webui' : coletar_dados_prometheus('Pods', 'container_memoryWorking_set_bytes_teastore-webui-5d9c74d9d6-9lrw5')['data']['result'][0]['value'],
+        'teastore_db': coletar_dados_prometheus('Pods', 'container_memoryWorking_set_bytes_teastore-db-5d9555684f-w64kj')['data']['result'][0]['value'],
+        'teastore_image' : coletar_dados_prometheus('Pods', 'container_memoryWorking_set_bytes_teastore-image-74cc7d64c5-6bppm')['data']['result'][0]['value'],
+        'teastore_persistence': coletar_dados_prometheus('Pods', 'container_memoryWorking_set_bytes_teastore-persistence-6cc5b44f9d-wm8hn')['data']['result'][0]['value'],
+        'teastore_auth': coletar_dados_prometheus('Pods', 'container_memoryWorking_set_bytes_teastore-auth-7947675f98-rbk99')['data']['result'][0]['value'],
+        'teastore_recommender': coletar_dados_prometheus('Pods', 'container_memoryWorking_set_bytes_teastore-recommender-794c699f5-v69gm')['data']['result'][0]['value'],
+        'teastore_registry': coletar_dados_prometheus('Pods', 'container_memoryWorking_set_bytes_teastore-registry-8bbbc8d7f-5kj9')['data']['result'],
+
+    }
+
+
+    read = {
+        'teastore_webui' : coletar_dados_prometheus('Pods', 'container_fs_reads_bytes_total_teastore-webui-5d9c74d9d6-9lrw5')['data']['result'][0]['value'],
+        'teastore_db': coletar_dados_prometheus('Pods', 'container_fs_reads_bytes_total_teastore-db-5d9555684f-w64kj')['data']['result'][0]['value'],
+        'teastore_image' : coletar_dados_prometheus('Pods', 'container_fs_reads_bytes_total_teastore-image-74cc7d64c5-6bppm')['data']['result'][0]['value'],
+        'teastore_persistence': coletar_dados_prometheus('Pods', 'container_fs_reads_bytes_total_teastore-persistence-6cc5b44f9d-wm8hn')['data']['result'][0]['value'],
+        'teastore_auth': coletar_dados_prometheus('Pods', 'container_fs_reads_bytes_total_teastore-auth-7947675f98-rbk99')['data']['result'][0]['value'],
+        'teastore_recommender': coletar_dados_prometheus('Pods', 'container_fs_reads_bytes_total_teastore-recommender-794c699f5-v69gm')['data']['result'][0]['value'],
+        'teastore_registry': coletar_dados_prometheus('Pods', 'container_fs_reads_bytes_total_teastore-registry-8bbbc8d7f-5kj9')['data']['result'],
+
+    },
+    writes = {
+        'teastore_webui' : coletar_dados_prometheus('Pods', 'container_fs_writes_bytes_total_teastore-webui-5d9c74d9d6-9lrw5')['data']['result'][0]['value'],
+        'teastore_db': coletar_dados_prometheus('Pods', 'container_fs_writes_bytes_total_teastore-db-5d9555684f-w64kj')['data']['result'][0]['value'],
+        'teastore_image' : coletar_dados_prometheus('Pods', 'container_fs_writes_bytes_total_teastore-image-74cc7d64c5-6bppm')['data']['result'][0]['value'],
+        'teastore_persistence': coletar_dados_prometheus('Pods', 'container_fs_writes_bytes_total_teastore-persistence-6cc5b44f9d-wm8hn')['data']['result'][0]['value'],
+        'teastore_auth': coletar_dados_prometheus('Pods', 'container_fs_writes_bytes_total_teastore-auth-7947675f98-rbk99')['data']['result'][0]['value'],
+        'teastore_recommender': coletar_dados_prometheus('Pods', 'container_fs_writes_bytes_total_teastore-recommender-794c699f5-v69gm')['data']['result'][0]['value'],
+        'teastore_registry': coletar_dados_prometheus('Pods', 'container_fs_writes_bytes_total_teastore-registry-8bbbc8d7f-5kj9')['data']['result'],
+    },
+
+    transmit ={
+        'teastore_webui' : coletar_dados_prometheus('Pods', 'container_network_transmit_bytes_total_teastore-webui-5d9c74d9d6-9lrw5')['data']['result'][0]['value'],
+        'teastore_db': coletar_dados_prometheus('Pods', 'container_network_transmit_bytes_total_teastore-db-5d9555684f-w64kj')['data']['result'][0]['value'],
+        'teastore_image' : coletar_dados_prometheus('Pods', 'container_network_transmit_bytes_total_teastore-image-74cc7d64c5-6bppm')['data']['result'][0]['value'],
+        'teastore_persistence': coletar_dados_prometheus('Pods', 'container_network_transmit_bytes_total_teastore-persistence-6cc5b44f9d-wm8hn')['data']['result'][0]['value'],
+        'teastore_auth': coletar_dados_prometheus('Pods', 'container_network_transmit_bytes_total_teastore-auth-7947675f98-rbk99')['data']['result'][0]['value'],
+        'teastore_recommender': coletar_dados_prometheus('Pods', 'container_network_transmit_bytes_total_teastore-recommender-794c699f5-v69gm')['data']['result'][0]['value'],
+        'teastore_registry': coletar_dados_prometheus('Pods', 'container_network_transmit_bytes_total_teastore-registry-8bbbc8d7f-5kj9')['data']['result'],
+
+    },
+
+    receive =[{
+        'teastore_webui' : coletar_dados_prometheus('Pods', 'container_network_receive_bytes_total_teastore-webui-5d9c74d9d6-9lrw5')['data']['result'][0]['value'],
+        'teastore_db': coletar_dados_prometheus('Pods', 'container_network_receive_bytes_total_teastore-db-5d9555684f-w64kj')['data']['result'][0]['value'],
+        'teastore_image' : coletar_dados_prometheus('Pods', 'container_network_receive_bytes_total_teastore-image-74cc7d64c5-6bppm')['data']['result'][0]['value'],
+        'teastore_persistence': coletar_dados_prometheus('Pods', 'container_network_receive_bytes_total_teastore-persistence-6cc5b44f9d-wm8hn')['data']['result'][0]['value'],
+        'teastore_auth': coletar_dados_prometheus('Pods', 'container_network_receive_bytes_total_teastore-auth-7947675f98-rbk99')['data']['result'][0]['value'],
+        'teastore_recommender': coletar_dados_prometheus('Pods', 'container_network_receive_bytes_total_teastore-recommender-794c699f5-v69gm')['data']['result'][0]['value'],
+        'teastore_registry': coletar_dados_prometheus('Pods', 'container_network_receive_bytes_total_teastore-registry-8bbbc8d7f-5kj9')['data']['result'],
+    }]
+
+
+    disk ={
+        'readNods': read,
+        'writeNods': writes,
 
     }
     netWork ={
-        'transmit_bytes' : coletar_dados_prometheus('rede', 'container_network_transmit_bytes_total')['data']['result'],
-        'receive_bytes': coletar_dados_prometheus('rede', 'container_network_receive_bytes_total')['data']['result']
+        'transmit_bytes' : transmit,
+        'receive_bytes': receive,
     }
-    teastore_webui_5d9c74d9d6_9lrw5 ={'teastore_webui_5d9c74d9d6_9lrw5': {
-            'CPU': consumeCpuByContainer['data']['result'],
-            'MEMORY': consumeMemoryByContainer['data']['result'],
-            'FileSystem': FileSystem,
+    MergeMetricsNodes ={
+            'CPU': CpuMetrics,
+            'MEMORY': [MemoryMetrics],
+            'disk': disk,
             'Network': netWork,
-            }
-        }
-    return teastore_webui_5d9c74d9d6_9lrw5
+    }
+        
+    return MergeMetricsNodes
 
 
 @app.route('/')
@@ -198,7 +320,7 @@ def cpuBycontainer():
 def pods():
     # data = datetime.now()
     # timesStamp = (time.mktime(data.timetuple()))
-    resp = coletar_dados_prometheus('Pods', 'kube_pod_labels', '')
+    resp = coletar_dados_prometheus('Pods', 'container_spec_cpu_period', '')
     return resp
 
 @app.route('/percent-memory', methods=['GET'])
@@ -248,7 +370,7 @@ def rede_metric(metric):
     nowForm = (str(data).replace(' ', 'T'))
     startAt = nowForm[:23]+'Z'
 
-    interval = datetime.now() - timedelta(minutes=5) #subtraindo 5 minutos do instante atual
+    interval = datetime.now() - timedelta(minutes=10) #subtraindo 5 minutos do instante atual
     intvalForm = (str(interval).replace(' ', 'T'))
     endAt = intvalForm[:23]+'Z'
 
@@ -267,7 +389,7 @@ def rede_io():
     nowForm = (str(data).replace(' ', 'T'))
     startAt = nowForm[:23]+'Z'
 
-    interval = datetime.now() - timedelta(minutes=5) #subtraindo 5 minutos do instante atual
+    interval = datetime.now() - timedelta(minutes=10) #subtraindo 5 minutos do instante atual
     intvalForm = (str(interval).replace(' ', 'T'))
     endAt = intvalForm[:23]+'Z'
 

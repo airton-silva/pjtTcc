@@ -281,7 +281,8 @@ const FormPreferences = (prop) => {
 
                             <Row className="mb-3">
                                 <Form.Group md={{ span: 3, offset: 9}} as={Col}>
-                                    <Button type="submit">Salvar</Button>                                                                        
+                                    <Button variant="outline-secondary" style={{ marginRight:"5px" }}>cancelar</Button> 
+                                    <Button variant="outline-primary" type="submit">Salvar</Button>                                                                           
                                 </Form.Group>
                             </Row>
                         </Form>
