@@ -12,13 +12,15 @@ const ShowPreferences = () => {
     const [preferences, setPreferences] = React.useState([]);
     const [preferenceId, setPreferenceId] = React.useState("");
     const [lgShow, setLgShow] = React.useState(false);
-    let navigate = useNavigate();
+  
+
     const getPreferences = async () => {
         try {
 
             const resp = await api.get('/preferences');
             const response = resp.data; 
             setPreferences(response);
+            // console.log(response)
                         
         } catch (error) {
             console.log(error);
@@ -32,6 +34,7 @@ const ShowPreferences = () => {
             
             const resp = await api.delete(`/preferences/${id}`);
             console.log(id);
+            getPreferences();
 
 
                                       

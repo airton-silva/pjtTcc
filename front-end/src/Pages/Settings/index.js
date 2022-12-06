@@ -30,10 +30,10 @@ const Settings = () => {
                 </div>    
                 <Row style={{ paddingTop:'20px', paddingBottom:'20px' }}>
                     <Col md={{ span: 7, offset:1}} >
-                        <h4>Criar predefinição de parametros de Falha</h4>
+                        <h4>Criar de Dicionário de Consultas</h4>
                     </Col>
                     <Col md={{ span: 3, offset:1}} >
-                        <Button onClick={handleForm} ><FiPlus/> Criar Prefrerencias  </Button>
+                        <Button onClick={handleForm} ><FiPlus/> Criar dicionário  </Button>
                     </Col>
                 </Row>
                 <div>

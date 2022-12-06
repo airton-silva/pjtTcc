@@ -71,7 +71,7 @@ const FormPreferences = (prop) => {
             const resp = await api.get('/pods');
             const response = resp.data.data.result; 
             setPods(response);
-                        
+            console.log(response)   ;         
         } catch (error) {
             console.log(error);
             
@@ -170,7 +170,7 @@ const FormPreferences = (prop) => {
         <>
             <div style={{ display: show }}>
                 <Card className="text-center">
-                    <Card.Header as="h4">Cadastro de padrões considerados como falhas {preferenceId}</Card.Header>
+                    <Card.Header as="h4">Criação de dicionário de consultas {preferenceId}</Card.Header>
                     <Card.Body>
                         <Form  onSubmit={saveOrUpdate}>
                             <Row className="mb-3">
@@ -209,7 +209,7 @@ const FormPreferences = (prop) => {
                                 </Form.Group>
 
                                 <Form.Group as={Col} md="3" controlId="formBasicSelect">
-                                    <Form.Label>Metrica</Form.Label>
+                                    <Form.Label>Grupo de Metrica</Form.Label>
                                     <Form.Control
                                     as="select"
                                     name="metric"

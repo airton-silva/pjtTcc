@@ -32,6 +32,7 @@ const ChartRede = () => {
         }
 
     };
+    // console.log("Grede", dataSet)
 
     React.useEffect(() => {
         getNetworkIO();

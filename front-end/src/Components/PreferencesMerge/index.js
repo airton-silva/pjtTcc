@@ -4,6 +4,8 @@ import { Card, Row, Col } from "react-bootstrap"
 import api from "../../Services/Api"
 import CardTableMergeMetric from "../CardTablePreferences/CardTableMergeMetric";
 import { AiOutlineDown, FiTrash } from "react-icons/ai";
+import Chart from "react-google-charts";
+import _ from "lodash";
 
 const PreferencesMerge = () => {
 
@@ -22,6 +24,10 @@ const PreferencesMerge = () => {
     const [openCardRedeSend, setOpenCardRedeSend] = React.useState("none");
     const [openCardRedeTrans, setOpenCardRedeTrans] = React.useState("none");
 
+    const [cpu, setCpu] = React.useState([]);
+
+
+    // console.log("rd Disco",preferenceMergeDiskRd)
 
     const handleCard = (opc, val) => {
         console.log(opc, val)
@@ -69,6 +75,13 @@ const PreferencesMerge = () => {
         //    }else
         //        setOpenForm("none");
     }
+    
+
+
+    // const data=[[ 1666307520.016, 0.01904888360277914], [ 1666307520.002, 0.0011887711927912117], [1666307520.007, 0.01777928710030761]];
+    // const dsetCpu =[[ "cpu", "Pod"], ...data];
+    
+    // console.log(dsetCpu)
 
     const getPreferencesMerge = async () => {
         try {
@@ -76,23 +89,25 @@ const PreferencesMerge = () => {
             const resp = await api.get('/preferences/merge');
             const response = resp.data;
             setPreferencesMerge(response);
+            setCpu(response.CPU);
             const { CPU } = response
             const [cpu] = CPU
             const cpuValues = []
             const keys = Object.keys(cpu)
-            keys.map(key => cpuValues.push({ pod: key, tempo: cpu[key][0], valor: cpu[key][1] }))
+            keys.map(key => cpuValues.push({ pod: key, tempo: cpu[key][0], valor: Number(cpu[key][1]) }))
             setPreferencesMergeCpu(cpuValues)
             // Leitura de disco
             const { disk: { readNods } } = response;
             const [read] = readNods
             const diskRead = []
-            keys.map(key => diskRead.push({ pod: key, tempo: read[key][0], valor: read[key][1] }))
+            // keys.map(key => diskRead.push({ pod: key, tempo: read[key][0], valor: read[key][1] }))
+            keys.map(key => diskRead.push({ pod: key, tempo: read[key], valor: read[key] }))
             setPreferencesMergeDiskRd(diskRead)
             // Leitura de disco
             const { disk: { writeNods } } = response;
             const [write] = writeNods
             const diskWrite = []
-            keys.map(key => diskWrite.push({ pod: key, tempo: write[key][0], valor: write[key][1] }))
+            keys.map(key => diskWrite.push({ pod: key, tempo: write[key], valor: write[key] }))
             setPreferencesMergeDiskWd(diskWrite)
             // Memoria
             const { MEMORY } = response;
@@ -105,13 +120,15 @@ const PreferencesMerge = () => {
             const { Network: { receive_bytes } } = response;
             const [receive] = receive_bytes
             const netReceive = []
-            keys.map(key => netReceive.push({ pod: key, tempo: receive[key][0], valor: receive[key][1] }))
+            // keys.map(key => netReceive.push({ pod: key, tempo: receive[key][0], valor: receive[key][1] }))
+            keys.map(key => netReceive.push({ pod: key, tempo: receive[key], valor: receive[key] }))
             setPreferencesMergeNetworkRec(netReceive)
             // Network receive
             const { Network: { transmit_bytes } } = response;
             const [transmit] = transmit_bytes
             const netTransmit = []
-            keys.map(key => netTransmit.push({ pod: key, tempo: transmit[key][0], valor: transmit[key][1] }))
+            // keys.map(key => netTransmit.push({ pod: key, tempo: transmit[key][0], valor: transmit[key][1] }))
+            keys.map(key => netTransmit.push({ pod: key, tempo: transmit[key], valor: transmit[key] }))
             setPreferencesMergeNetworkSent(netTransmit)
 
 
@@ -138,9 +155,9 @@ const PreferencesMerge = () => {
                                     Consumo de Cpu dos Pods
                                 </h4>
                             </Col>
-                            <Col  md={{ span: 1, offset: 4}}>
-                                <h4><AiOutlineDown onClick={() => { handleCard(1, openCardCpu) }}  /></h4>
-                            
+                            <Col md={{ span: 1, offset: 4 }}>
+                                <h4><AiOutlineDown onClick={() => { handleCard(1, openCardCpu) }} /></h4>
+
                             </Col>
                         </Row>
                     </div>
@@ -150,6 +167,19 @@ const PreferencesMerge = () => {
                             mergeMetric={preferenceMergeCpu}
                         />
                     </div>
+
+                    {/* <Card className="text-center">
+                        <Card.Header as="h4">CPU-Grf</Card.Header>
+                        <Card.Body>
+                            <Chart
+                                chartType={"LineChart"}
+                                data={dsetCpu}
+                                // options={options}
+                                legendToggle
+                            />
+                        </Card.Body>
+                    </Card> */}
+
                 </div>
 
                 <div>
@@ -162,13 +192,13 @@ const PreferencesMerge = () => {
                                 </h4>
 
                             </Col>
-                            <Col md={{ span: 1, offset: 4}}>
+                            <Col md={{ span: 1, offset: 4 }}>
                                 <h4><AiOutlineDown onClick={() => { handleCard(2, openCardDiskRc) }} /></h4>
-                            
+
                             </Col>
                         </Row>
 
-                        
+
                     </div>
                     <div style={{ display: openCardDiskRc }}>
                         <CardTableMergeMetric
@@ -186,8 +216,8 @@ const PreferencesMerge = () => {
                                     Disco dos Pods Escrita
                                 </h4>
                             </Col>
-                            <Col md={{ span: 1, offset: 4}}>
-                                <h4><AiOutlineDown onClick={() => { handleCard(3, openCardDiskWd) }}/></h4>
+                            <Col md={{ span: 1, offset: 4 }}>
+                                <h4><AiOutlineDown onClick={() => { handleCard(3, openCardDiskWd) }} /></h4>
                             </Col>
                         </Row>
                     </div>
@@ -207,15 +237,15 @@ const PreferencesMerge = () => {
                                     Memoria dos Pods
 
                                 </h4>
-                            
+
                             </Col>
-                            <Col md={{ span: 1, offset: 4}}>
+                            <Col md={{ span: 1, offset: 4 }}>
                                 <h4><AiOutlineDown onClick={() => { handleCard(4, openCardMemory) }} /></h4>
-                            
+
                             </Col>
                         </Row>
 
-                        
+
                     </div>
                     <div style={{ display: openCardMemory }}>
                         <CardTableMergeMetric
@@ -235,15 +265,15 @@ const PreferencesMerge = () => {
                                     Rede Bytes Recebidos
 
                                 </h4>
-                            
+
                             </Col>
-                            <Col md={{ span: 1, offset: 4}}>
+                            <Col md={{ span: 1, offset: 4 }}>
                                 <h4><AiOutlineDown onClick={() => { handleCard(5, openCardRedeSend) }} /></h4>
-                            
+
                             </Col>
                         </Row>
 
-                        
+
                     </div>
                     <div style={{ display: openCardRedeSend }}>
                         <CardTableMergeMetric
@@ -262,17 +292,17 @@ const PreferencesMerge = () => {
                                     Rede Bytes Transmitido
 
                                 </h4>
-                            
+
                             </Col>
-                            <Col md={{ span: 1, offset: 4}}>
+                            <Col md={{ span: 1, offset: 4 }}>
                                 <h4>
-                                    <AiOutlineDown onClick={() => { handleCard(6, openCardRedeTrans) }}  />
+                                    <AiOutlineDown onClick={() => { handleCard(6, openCardRedeTrans) }} />
                                 </h4>
-                            
+
                             </Col>
                         </Row>
 
-                        
+
                     </div>
                     <div style={{ display: openCardRedeTrans }}>
                         <CardTableMergeMetric
