@@ -15,6 +15,7 @@ const Header = () => {
 
     const [alerts, setAlerts] = React.useState([])
     const [lgShow, setLgShow] = React.useState(false);
+    const [in_alert, setInAlert] = React.useState([])
 
     const getAlets = async () => {
         try {
@@ -26,6 +27,7 @@ const Header = () => {
         }
 
     };
+    
 
     console.log(alerts)
     React.useEffect(() => {
@@ -33,11 +35,28 @@ const Header = () => {
 
 
     }, []);
+
+    React.useEffect(() => {
+        const interval = setInterval(async () => {
+            try {
+                const resp = await api.get('/alerts');
+                const { data } = resp
+                setAlerts(data)
+            } catch (error) {
+                console.error(error);
+            }
+        }, 60000);
+      
+        return () => clearInterval(interval);
+    }, []);
+
+
+
     return (
         <>
             <Navbar bg="primary" variant="dark">
                 <Container>
-                    <Navbar.Brand href="/">MicroDataMetrics </Navbar.Brand>
+                    <Navbar.Brand href="/">APMFe </Navbar.Brand>
                     <Nav className="me-auto">
 
                         <Link to="/" className="nv-link"><BiHomeHeart /> Cluster </Link>
@@ -70,17 +89,17 @@ const Header = () => {
 
                         {alerts.length > 0 && (
                             alerts.map((val, key) => {
-                                console.log(val.type)
+                                // console.log(val.type)
                                 return (
                                     <li className="alert alert-danger">
                                         <span><strong>Pod:</strong> {val.pod} </span>
-                                        <span style={{ marginLeft:'30px' }}><strong>Data:</strong> {val.create_at}</span><br/>
+                                        <span style={{ marginLeft: '30px' }}><strong>Data:</strong> {val.create_at}</span><br />
                                         <span ><strong>Metrica:</strong> {val.type}</span>
-                                        <span style={{ marginLeft:'10px' }}><strong>Tipo:</strong> {val.mtype}</span>
-                                        <span style={{ marginLeft:'10px' }}><strong>tempo:</strong> {Formats.formTimeStampToHours(val.time)}</span>
-                                        <span style={{ marginLeft:'10px' }}><strong>valor:</strong> {val.value}</span>
+                                        <span style={{ marginLeft: '10px' }}><strong>Tipo:</strong> {val.mtype}</span>
+                                        <span style={{ marginLeft: '10px' }}><strong>tempo:</strong> {Formats.formTimeStampToHours(val.time)}</span>
+                                        <span style={{ marginLeft: '10px' }}><strong>valor:</strong> {val.value}</span>
                                     </li>
-                                    
+
                                 )
 
                             })

@@ -8,7 +8,6 @@ from this import s
 from urllib import response
 import time
 import json
-# from urllib import response
 from flask import Flask, Response, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Float
@@ -18,130 +17,18 @@ from main import coletar_dados_prometheus, criar_requisicao_prometheus_2
 from main import getTargets
 from main import search_metric, buscar, gerarMetadata, gerarQueryPreferences, conf_data_source, search_metric_opc
 from alerts import getAlertByPod
+from models import db, ModelAlerts,ModelDataSources,ModelPreferences,ModelCargas
 
-# from main import gerar_response
-
-
-# from ModelPreferences import ModelPreferences
-
+import schedule
 
 app = Flask(__name__)
 CORS(app)
-
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/monitor'
+db.init_app(app)
 
-db=SQLAlchemy(app)
-
-
-
-class ModelPreferences(db.Model):
-    __tablename__ = 'preferences'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    name_pod = db.Column(db.String(50))
-    metric = db.Column(db.String(50))
-    type = db.Column(db.String(50))
-    value_failure = db.Column(db.String(20))
-    period_time = db.Column(db.String(20))
-    myquery = db.Column(db.String(255))
-    create_at = db.Column(db.DateTime)
-    update_at = db.Column(db.DateTime)
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'name_pod':self.name_pod,
-            'metric': self.metric,
-            'type': self.type,
-            'value_failure': self.value_failure,
-            'period_time' : self.period_time,
-            'myquery': self.myquery,
-            'create_at': self.create_at,
-            'update_at': self.update_at
-        }
- 
-db.create_all()
-
-class ModelDataSources(db.Model):
-    __tablename__ = 'data_source'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    url = db.Column(db.String(50))
-    authType = db.Column(db.String(50))
-
-
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'url':self.url,
-            'authType': self.authType
-        }
-db.create_all()
-
-class ModelAlerts(db.Model):
-    __tablename__ ='alerts_fails'
-    id = db.Column(db.Integer, primary_key=True)
-    pod = db.Column(db.String(50))
-    mtype = db.Column(db.String(20))
-    type = db.Column(db.String(50))
-    alert = db.Column(db.String(50))
-    time = db.Column(db.String(20))
-    value = db.Column(db.String(20))
-    create_at = db.Column(db.DateTime)
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'pod': self.pod,
-            'mtype':self.mtype,
-            'type': self.type,
-            'alert':self.alert,
-            'time': self.time,
-            'value': self.value,
-            'create_at': self.create_at
-        }
-db.create_all()
-
-
-class ModelCargas(db.Model):
-    __tablename__ = 'cargas'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
-    latencia_mean = db.Column(db.Float)
-    latencia_total = db.Column(db.Float)
-    mean_bytes_in = db.Column(db.Float)
-    request_duration = db.Column(db.Float)
-    wait = db.Column(db.Float)
-    requests = db.Column(db.Integer)
-    throughput = db.Column(db.Float)
-    status_cod_success = db.Column(db.Integer)
-    status_cod_bad_requset = db.Column(db.Integer)
-    status_cod_sever = db.Column(db.Integer)
-    errors = db.Column(db.String(255))
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'latencia_mean': self.latencia_mean,
-            'latencia_total': self.latencia_total,
-            'mean_bytes_in':self.mean_bytes_in,
-            'request_duration': self.request_duration,
-            'wait': self.wait,
-            'requests': self.requests,
-            'throughput' : self.throughput,
-            'status_cod_success': self.status_cod_success,
-            'status_cod_bad_requset': self.status_cod_bad_requset,
-            'status_cod_sever': self.status_cod_sever,
-            'errors': self.errors
-        }
- 
-db.create_all()
+# db=SQLAlchemy(app)
+# db.create_all()
 
 #teste de carga
 @app.route('/carga', methods=['POST'])
@@ -181,11 +68,8 @@ def get_dataSources():
 @app.route('/prometheus', methods=['GET'])
 def mydatasources():
     dt_source = ModelDataSources.query.filter_by(name='Prometheus').first()
-    # dt_source = ModelDataSources.query.all()
     d = conf_data_source(dt_source.to_dict())
-    # for row in dt_source:
-    #     print(row.name)
-  
+ 
     if dt_source:
         return jsonify(dt_source.to_dict())
     else:
@@ -195,21 +79,19 @@ def mydatasources():
 def tst_metric():
     preferences = ModelPreferences.query.all()
     data = [preference.to_dict() for preference in preferences]
-    # print(data['name'])
     rede = {}
     memory={}
     disco={}
     cpu={}
     mydict =[]
     for preference in preferences:
-        # print(preference.metric+'_'+preference.name_pod)
-        # print(preference.metric)
+
         if preference.metric == 'REDE':
             rede = {
                 "%s " % preference.name_pod +":"+ "'%s'" % preference.myquery
             }
             mydict.append(rede)
-            # print(rede)
+  
         elif preference.metric == 'MEMORIA':
             memory = {
                 "%s " % preference.name_pod +":"+ "'%s'" % preference.myquery
@@ -227,7 +109,6 @@ def tst_metric():
             mydict.append(disco)
 
     data = mydict
-    # print(type(data) )
 
     class SetEncoder(json.JSONEncoder):
         def default(self, obj):
@@ -826,5 +707,6 @@ def metadatas():
     resp = gerarMetadata()
     return resp
 
-
-app.run()
+if __name__ == '__main__':
+    app.run(debug=True)
+# app.run()

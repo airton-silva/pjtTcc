@@ -3,6 +3,7 @@ from ast import Str
 import numpy as np 
 from main import coletar_dados_prometheus
 
+
 PODS=['teastore-webui-5d554cc97f-b9xvj', 'teastore-image-5599565ccf-mnl5v',
       'teastore-db-5d9555684f-w64kj', 'teastore-auth-775c7fc4cc-ck64p',
       'teastore-recommender-8589c6d499-g96fp','teastore-persistence-d69d45b4-47bsj',
@@ -22,6 +23,7 @@ def getAlertByPod (name_pod: str, metric: str, type:str, value) -> dict:
         print("são iguais")
     # print(name_pod in PODS)
     if(name_pod in PODS):
+        #realizar consulta da metrica no prometheus
         mtc = coletar_dados_prometheus('Pods', '%s'%tp)
         print(mtc)
         if(float(mtc['data']['result'][0]['value'][1]) > float(value)):
@@ -49,3 +51,4 @@ def getAlertByPod (name_pod: str, metric: str, type:str, value) -> dict:
         # return ("Pod %s Não encontrado" %name_pod)
         return None
     
+  
