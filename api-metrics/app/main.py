@@ -33,6 +33,7 @@ def conf_data_source (data: dict) -> dict:
 METRICAS = {
     'rede': {
         'recebido': 'container_network_receive_bytes_total',
+        'transmitido': 'container_network_transmit_bytes_total',
         'receive': 'sum (rate (container_network_receive_bytes_total{kubernetes_io_hostname=~"^.*$"}[1m]))',
         'sent': '- sum (rate (container_network_transmit_bytes_total{kubernetes_io_hostname=~"^.*$"}[1m]))',
 
@@ -55,6 +56,7 @@ METRICAS = {
     },
     'Memory':{
         'usage_bytes_total_teastore-webui-5d554cc97f-b9xvj':'container_memory_usage_bytes{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d554cc97f-b9xvj"}',
+        'node_memory_Active_bytes' : 'node_memory_Active_bytes',
         'machine_memory_bytes': 'sum (machine_memory_bytes{kubernetes_io_hostname=~\'^.*$\'})', # memoria da maquina 
         'container_memoryWorking_set_bytes':'sum (container_memory_working_set_bytes{id="/",kubernetes_io_hostname="dti-d610"})', # consumo de memória in bytes
         'consumo_percent_memory': 'sum (container_memory_working_set_bytes{id="/",kubernetes_io_hostname="dti-d610"}) / sum (machine_memory_bytes{kubernetes_io_hostname="dti-d610"}) * 100', # consumo em percentagem
@@ -63,6 +65,8 @@ METRICAS = {
         'consumo_percent_filesystem': 'sum (container_fs_usage_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/",kubernetes_io_hostname="dti-d610"}) / sum (container_fs_limit_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/",kubernetes_io_hostname="dti-d610"}) * 100',
         'consumo_total_filesystem': 'sum (container_fs_usage_bytes{device=~\"^/dev/[sv]d[a-z][1-9]$\",id=\"/\",kubernetes_io_hostname=~\"^.*$\"})',
         'container_fs_limit_bytes' : 'sum (container_fs_limit_bytes{device=~"^/dev/[sv]d[a-z][1-9]$",id="/",kubernetes_io_hostname=~\"^.*$\"})',
+        'container_fs_reads_bytes_total' : 'container_fs_reads_bytes_total',
+        'container_fs_writes_bytes_total' : 'container_fs_writes_bytes_total'
         # 'container_fs_reads_bytes_total_teastore-webui-5d554cc97f-b9xvj': 'sum(rate(container_fs_reads_bytes_total{kubernetes_io_hostname="dti-d610", pod="teastore-webui-5d9c74d9d6-9lrw5"}[1m]))'
     },
 

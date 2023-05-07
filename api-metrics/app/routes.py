@@ -566,8 +566,13 @@ def memoryHost():
 
 @app.route('/memory', methods=['GET'])
 def memory():
-    resp = coletar_dados_prometheus('Memory', 'machine_memory_bytes',' ')
-    return resp
+    memory={
+        'machine_memory_bytes': coletar_dados_prometheus('Memory', 'machine_memory_bytes',' '),
+        'container_memoryWorking_set_bytes' : coletar_dados_prometheus('Memory', 'container_memoryWorking_set_bytes',' '),
+        'consumo_percent_memory': coletar_dados_prometheus('Memory', 'consumo_percent_memory',' ')
+    }
+    # resp = coletar_dados_prometheus('Memory', 'machine_memory_bytes',' ')
+    return memory
 @app.route('/memory-usage', methods=['GET'])
 def memory_usage():
     resp = coletar_dados_prometheus('Memory', 'container_memoryWorking_set_bytes',' ')
@@ -587,7 +592,14 @@ def filesystemConsume():
 @app.route('/filesystem', methods=['GET'])
 def filesystem():
     resp = coletar_dados_prometheus('FileSystem', 'container_fs_limit_bytes', '')
-    return resp
+    disco= {
+        # 'container_fs_limit_bytes': coletar_dados_prometheus('FileSystem', 'container_fs_limit_bytes', ''),
+        'consumo_total_filesystem': coletar_dados_prometheus('FileSystem', 'container_fs_writes_bytes_total', ''),
+        'container_fs_reads_bytes_total' : coletar_dados_prometheus('FileSystem', 'container_fs_reads_bytes_total', ''),
+        'container_fs_writes_bytes_total' : coletar_dados_prometheus('FileSystem', 'container_fs_writes_bytes_total', '')
+
+    }
+    return disco
 
 @app.route('/filesystem/ct', methods=['GET'])
 def filesystem_ct():
@@ -645,7 +657,14 @@ def rede_io():
 
 @app.route('/rede', methods=['GET'])
 def rede():
-    resp = coletar_dados_prometheus('rede', 'recebido',' ')
+    send= coletar_dados_prometheus('rede', 'transmitido',' ')
+    receive= coletar_dados_prometheus('rede', 'recebido',' ')
+    rede ={
+        'send': send,
+        'receive':receive
+    }
+
+    resp = rede
     return resp
 
 @app.route('/request', methods=['GET'])

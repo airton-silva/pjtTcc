@@ -248,6 +248,25 @@ const FormPreferences = (prop) => {
                                     </Form.Control>
                                     <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
                                 </Form.Group>
+                                <Form.Group as={Col} md="1" controlId="validationCustom02">
+                                    <Form.Label>é</Form.Label>
+                                    <Form.Control
+                                    as="select"
+                                    name="type"
+                                    value={type}
+                                    onChange={e => {
+                                        setType(e.target.value);
+                                    }}
+                                    >
+
+                                        <option value='>'>{" >="} </option>
+                                        <option value='<'>{"<="}</option>                                        
+
+                                        
+
+                                    </Form.Control>
+                                    <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
+                                </Form.Group>
                                 <Form.Group as={Col} md="3" controlId="validationCustom03">
                                     <Form.Label>Valor de Falha</Form.Label>
                                     <Form.Control 
@@ -262,7 +281,7 @@ const FormPreferences = (prop) => {
                                         Por favor informe um valor de falha.
                                     </Form.Control.Feedback>
                                 </Form.Group>
-                                <Form.Group as={Col} md="3" controlId="validationCustom04">
+                                <Form.Group as={Col} md="2" controlId="validationCustom04">
                                     <Form.Label>Tempo em minuros</Form.Label>
                                     <Form.Control 
                                         type="text" 
@@ -278,6 +297,7 @@ const FormPreferences = (prop) => {
                                 </Form.Group>
 
                             </Row>
+                            
 
                             <Row className="mb-3">
                                 <Form.Group md={{ span: 3, offset: 9}} as={Col}>
