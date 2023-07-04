@@ -56,7 +56,7 @@ const Header = () => {
         <>
             <Navbar bg="primary" variant="dark">
                 <Container>
-                    <Navbar.Brand href="/">APMFe </Navbar.Brand>
+                    <Navbar.Brand href="/">APME </Navbar.Brand>
                     <Nav className="me-auto">
 
                         <Link to="/" className="nv-link"><BiHomeHeart /> Cluster </Link>
